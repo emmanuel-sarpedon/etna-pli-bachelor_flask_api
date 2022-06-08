@@ -2,11 +2,12 @@ import services.auth as service
 
 
 def sign_up(request):
-    username = request["username"]
+    firstname = request["firstname"]
+    lastname = request["lastname"]
     email = request["email"]
     password = request["password"]
 
-    if service.is_user_already_registered(username, email):
+    if service.is_user_already_registered(email):
         return service.throw_error_user_already_exists(), 403
 
-    return service.register_new_user(username, email, password), 201
+    return service.register_new_user(firstname, lastname, email, password), 201

@@ -1,21 +1,24 @@
-import flask
-
-from models.user import User, db
+from model import User, db
 from werkzeug.security import generate_password_hash
-from sqlalchemy import or_
+from flask_sqlalchemy import SQLAlchemy
 
 
 def throw_error_user_already_exists():
     return {"error": {"message": "User already exists"}}
 
 
-def is_user_already_registered(username, email):
-    return bool(User.query.filter(or_(User.username == username, User.email == email)).first())
+def is_user_already_registered(email):
+    return bool(User.query.filter_by(email=email).first())
 
 
-def register_new_user(username, email, password):
-    new_user = User(username=username, email=email, password=generate_password_hash(password))
+def register_new_user(firstname, lastname, email, password):
+    new_user = User(firstname=firstname,
+                    lastname=lastname,
+                    email=email,
+                    is_email_validated=False,
+                    password=generate_password_hash(password))
 
+    # db = SQLAlchemy()
     db.session.add(new_user)
     db.session.commit()
 

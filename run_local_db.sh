@@ -1,3 +1,3 @@
 #!/bin/zsh
 
-export DB=local && flask run
+export DB=local && export FLASK_APP=app && flask run
