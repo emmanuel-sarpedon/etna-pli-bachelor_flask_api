@@ -1,6 +1,5 @@
 from flask import Blueprint, request
 from flask_expects_json import expects_json
-from flask_mail import Message, Mail
 import controllers.auth as controller
 import validations.auth as validation
 

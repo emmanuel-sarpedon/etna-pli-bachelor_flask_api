@@ -1,9 +1,7 @@
 import config
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_mail import Mail
 
 import routes.auth as auth
 
@@ -14,6 +12,7 @@ def create_app():
     _app = Flask(__name__)
 
     # General configuration
+    _app.config['SECRET_KEY'] = config.secret_key
     _app.config['FLASK_ENV'] = config.env
     _app.config['DEBUG'] = config.debug
 
@@ -21,14 +20,10 @@ def create_app():
     _app.config['SQLALCHEMY_DATABASE_URI'] = config.postgresConn
     _app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    from model import db, User
-
+    from model import db
     db.init_app(_app)
-    # with _app.app_context():
-    #     db.create_all()
-    #     db.session.commit()
-
     migrate.init_app(_app, db)
+
     # Endpoint registration
     _app.register_blueprint(auth.bp)
 
@@ -43,7 +38,7 @@ def create_app():
         "MAIL_PASSWORD": config.email_pwd
     })
 
-    mail = Mail()
+    from services.auth import mail
     mail.init_app(_app)
 
     return _app

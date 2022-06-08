@@ -5,6 +5,8 @@ SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
 SQLALCHEMY_DATABASE_URI_LOCAL = os.environ.get("SQLALCHEMY_DATABASE_URI_LOCAL")
 
 # App config
+secret_key = os.environ.get("SECRET_KEY")
+security_pwd_salt = os.environ.get("SECURITY_PWD_SALT")
 postgresConn = SQLALCHEMY_DATABASE_URI if DB == "cloud" else SQLALCHEMY_DATABASE_URI_LOCAL
 env = os.environ.get("FLASK_ENV")
 debug = os.environ.get("FLASK_DEBUG")

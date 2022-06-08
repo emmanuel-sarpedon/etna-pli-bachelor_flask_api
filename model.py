@@ -1,6 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy, inspect
-# from app import create_app
-import config
 
 db = SQLAlchemy()
 
@@ -11,7 +9,8 @@ class User(db.Model):
     lastname = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(50), unique=True, nullable=False)
     is_email_validated = db.Column(db.Boolean, nullable=False)
-    date_of_email_validation = db.Column(db.Date, nullable=True)
+    confirmation_token = db.Column(db.String)
+    date_of_email_validation = db.Column(db.Date)
     phone_number = db.Column(db.String(20))
     password = db.Column(db.String, nullable=False)
 
