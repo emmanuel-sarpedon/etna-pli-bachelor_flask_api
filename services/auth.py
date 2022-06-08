@@ -1,7 +1,9 @@
 from model import User, db
 from werkzeug.security import generate_password_hash
-from itsdangerous import URLSafeTimedSerializer
+from itsdangerous import URLSafeTimedSerializer, exc
+from flask import render_template
 from flask_mail import Message, Mail
+from datetime import date
 import config
 
 mail = Mail()
@@ -9,6 +11,10 @@ mail = Mail()
 
 def throw_error_user_already_exists():
     return {"error": {"message": "User already exists"}}
+
+
+def throw_error_token_is_denied():
+    return {"error": {"message": "Token denied"}}
 
 
 def is_user_already_registered(email):
@@ -44,10 +50,35 @@ def generate_confirmation_token(email):
     return serializer.dumps(email, salt=config.security_pwd_salt)
 
 
+def check_confirmation_token(token, expiration=3600):
+    serializer = URLSafeTimedSerializer(config.secret_key)
+
+    try:
+        email = serializer.loads(token, salt=config.security_pwd_salt, max_age=expiration)
+    except exc:
+        return False
+
+    return email
+
+
 def send_confirmation_code(email, token):
     msg = Message(subject="Vérification de votre adresse mail",
                   sender=config.email_sender,
-                  recipients=[email],
-                  body='Voici votre token de confirmation : {}'.format(token))
+                  recipients=[email])
+
+    msg.html = render_template("auth_verify_email.html", url='{}/auth/confirm/{}'.format(config.domain, token))
 
     mail.send(msg)
+
+
+def validate_account_email(email):
+    user = User.query.filter_by(email=email).first()
+
+    user.is_email_validated = True
+    user.date_of_email_validation = date.today()
+    user.confirmation_token = None
+
+    db.session.add(user)
+    db.session.commit()
+
+    return {"message": "email validated"}

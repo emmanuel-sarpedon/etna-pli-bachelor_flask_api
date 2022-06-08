@@ -10,3 +10,9 @@ bp = Blueprint('auth', __name__, url_prefix="/auth")
 @expects_json(validation.sign_up)
 def sign_up():
     return controller.sign_up(request.get_json())
+
+
+@bp.route('/confirm/<token>', methods=['GET'])
+def index(token):
+    return controller.confirm_email(token)
+

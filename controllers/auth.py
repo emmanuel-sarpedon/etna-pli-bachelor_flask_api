@@ -14,3 +14,12 @@ def sign_up(request):
     service.send_confirmation_code(email, confirmation_token)
 
     return service.register_new_user(firstname, lastname, email, password, confirmation_token), 201
+
+
+def confirm_email(token):
+    email = service.check_confirmation_token(token)
+
+    if not email or not service.is_user_already_registered(email):
+        return service.throw_error_token_is_denied(), 403
+
+    return service.validate_account_email(email), 201
