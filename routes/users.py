@@ -3,7 +3,7 @@ from flask_expects_json import expects_json
 import controllers.auth as controller
 import validations.auth as validation
 
-bp = Blueprint('auth', __name__, url_prefix="/auth")
+bp = Blueprint('users', __name__, url_prefix="/users")
 
 
 @bp.route('/signup', methods=['POST'])
@@ -12,7 +12,13 @@ def sign_up():
     return controller.sign_up(request.get_json())
 
 
-@bp.route('/confirm/<token>', methods=['GET'])
-def index(token):
+@bp.route('/confirm-email/<token>', methods=['GET'])
+def confirm(token):
     return controller.confirm_email(token)
 
+
+@bp.route('/signup/renew-validation-token', methods=['PUT'])
+def renew():
+    email = request.get_json()['email']
+
+    return controller.renew_validation_token(email)

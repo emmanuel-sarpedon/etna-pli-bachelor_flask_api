@@ -1,7 +1,7 @@
 from model import User, db
 from werkzeug.security import generate_password_hash
-from itsdangerous import URLSafeTimedSerializer, exc
-from flask import render_template
+from itsdangerous import URLSafeTimedSerializer
+from flask import render_template, copy_current_request_context
 from flask_mail import Message, Mail
 from datetime import date
 import config
@@ -9,16 +9,17 @@ import config
 mail = Mail()
 
 
-def throw_error_user_already_exists():
-    return {"error": {"message": "User already exists"}}
-
-
-def throw_error_token_is_denied():
-    return {"error": {"message": "Token denied"}}
+def get_user_by_email(email):
+    return User.query.filter_by(email=email).first()
 
 
 def is_user_already_registered(email):
-    return bool(User.query.filter_by(email=email).first())
+    return bool(get_user_by_email(email))
+
+
+def generate_confirmation_token(email):
+    serializer = URLSafeTimedSerializer(config.secret_key)
+    return serializer.dumps(email, salt=config.security_pwd_salt)
 
 
 def register_new_user(firstname, lastname, email, password, confirmation_token):
@@ -29,8 +30,7 @@ def register_new_user(firstname, lastname, email, password, confirmation_token):
                     is_email_validated=False,
                     password=generate_password_hash(password))
 
-    db.session.add(new_user)
-    db.session.commit()
+    update_user_on_database(new_user)
 
     user_created = new_user.asdict()
 
@@ -39,26 +39,10 @@ def register_new_user(firstname, lastname, email, password, confirmation_token):
         'user_created': {
             '_id': user_created["id_user"],
             'firstname': user_created["firstname"],
-            '_ilastnamed': user_created["lastname"],
+            'lastnamed': user_created["lastname"],
             'email': user_created["email"]
         }
     }
-
-
-def generate_confirmation_token(email):
-    serializer = URLSafeTimedSerializer(config.secret_key)
-    return serializer.dumps(email, salt=config.security_pwd_salt)
-
-
-def check_confirmation_token(token, expiration=3600):
-    serializer = URLSafeTimedSerializer(config.secret_key)
-
-    try:
-        email = serializer.loads(token, salt=config.security_pwd_salt, max_age=expiration)
-    except exc:
-        return False
-
-    return email
 
 
 def send_confirmation_code(email, token):
@@ -66,9 +50,15 @@ def send_confirmation_code(email, token):
                   sender=config.email_sender,
                   recipients=[email])
 
-    msg.html = render_template("auth_verify_email.html", url='{}/auth/confirm/{}'.format(config.domain, token))
+    msg.html = render_template("auth_verify_email.html", url='{}/users/confirm-email/{}'.format(config.domain, token))
 
     mail.send(msg)
+
+
+def check_confirmation_token(token, expiration=3600):
+    serializer = URLSafeTimedSerializer(config.secret_key)
+
+    return serializer.loads(token, salt=config.security_pwd_salt, max_age=expiration)
 
 
 def validate_account_email(email):
@@ -78,7 +68,11 @@ def validate_account_email(email):
     user.date_of_email_validation = date.today()
     user.confirmation_token = None
 
-    db.session.add(user)
-    db.session.commit()
+    update_user_on_database(user)
 
     return {"message": "email validated"}
+
+
+def update_user_on_database(user):
+    db.session.add(user)
+    db.session.commit()
