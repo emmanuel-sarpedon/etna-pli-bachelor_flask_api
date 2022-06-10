@@ -10,3 +10,5 @@ python-dotenv
 itsdangerous~=2.1.2
 gunicorn
 psycopg2
+flask-swagger
+flask-swagger-ui

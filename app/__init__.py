@@ -1,10 +1,8 @@
 import config
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_migrate import Migrate
-
-import routes.root as root
-import routes.users as users
+from flask_swagger import swagger
 
 migrate = Migrate()
 
@@ -29,6 +27,8 @@ def create_app():
     migrate.init_app(_app, db)
 
     # Endpoint registration
+    import routes.root as root
+    import routes.users as users
     _app.register_blueprint(root.bp)
     _app.register_blueprint(users.bp)
 
@@ -45,6 +45,23 @@ def create_app():
 
     from services.auth import mail
     mail.init_app(_app)
+
+    # Swagger documentation
+    import routes.swagger as specs
+    _app.register_blueprint(specs.swaggerui_blueprint)
+
+    @_app.route('/api/specs')
+    def spec():
+        swag = swagger(
+            _app,
+            template={
+                "info": {
+                    "version": "0.1.0",
+                    "title": "Flask"
+                }
+            })
+
+        return jsonify(swag)
 
     return _app
 
