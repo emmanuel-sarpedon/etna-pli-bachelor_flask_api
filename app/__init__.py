@@ -3,6 +3,7 @@ import config
 from flask import Flask
 from flask_migrate import Migrate
 
+import routes.root as root
 import routes.users as users
 
 migrate = Migrate()
@@ -28,6 +29,7 @@ def create_app():
     migrate.init_app(_app, db)
 
     # Endpoint registration
+    _app.register_blueprint(root.bp)
     _app.register_blueprint(users.bp)
 
     # SMTP Mail
