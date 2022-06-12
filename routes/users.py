@@ -16,6 +16,7 @@ def sign_up():
         - users
     parameters:
       - in: body
+        name: body
         schema:
             properties:
                 firstname:
