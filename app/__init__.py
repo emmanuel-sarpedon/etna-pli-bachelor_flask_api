@@ -20,11 +20,16 @@ def create_app():
     _app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     from model import db
+
     db.init_app(_app)
-    # with _app.app_context():  #
-    #     db.create_all()       # -- For cloud database only --
-    #     db.session.commit()   #
-    migrate.init_app(_app, db)
+
+    if config.DB == "cloud":
+        with _app.app_context():  # -----------------------------
+            db.create_all()       # -- For cloud database only --
+            db.session.commit()   # -----------------------------
+
+    else:
+        migrate.init_app(_app, db)
 
     # Endpoint registration
     import routes.root as root
