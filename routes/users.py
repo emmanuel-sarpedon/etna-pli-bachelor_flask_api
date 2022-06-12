@@ -42,11 +42,17 @@ def confirm(token):
     ---
     tags:
         - users
+    parameters:
+        - in : path
+          name : token
+          description: Token required for validation
+          required: true
+          type: string
     responses:
         201:
             description: Email validated
         401:
-            description: Token expiré ou invalide
+            description: Invalid or expired token
     """
     return controller.confirm_email(token)
 
