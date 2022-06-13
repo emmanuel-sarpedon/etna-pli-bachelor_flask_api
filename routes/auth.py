@@ -6,7 +6,7 @@ import validations.auth as validation
 bp = Blueprint('auth', __name__, url_prefix="/auth")
 
 
-@bp.route('/signup', methods=['POST'])
+@bp.route('/registration', methods=['POST'])
 @expects_json(validation.sign_up)
 def sign_up():
     """
@@ -30,13 +30,27 @@ def sign_up():
     responses:
         201:
             description: User created
+            schema:
+                type: json
+                example: {
+                            'message': 'User created',
+                            'user_created': {
+                                '_id': 164,
+                                'firstname': "John",
+                                'lastnamed': "DOE",
+                                'email': "john.doe@etna.io"
+                            }
+                }
         409:
             description: Email already used
+            schema:
+                type: json
+                example: {"error": {"message": "User already exists"}}
     """
     return controller.sign_up(request.get_json())
 
 
-@bp.route('/confirm-email/<token>', methods=['PUT'])
+@bp.route('/email-confirmation', methods=['PUT'])
 def confirm(token):
     """
     User email confirmation
@@ -44,21 +58,29 @@ def confirm(token):
     tags:
         - auth
     parameters:
-        - in : path
-          name : token
+        - in : body
+          name: body
           description: Token required for validation
-          required: true
-          type: string
+          schema:
+            properties:
+                token:
+                    type: string
     responses:
         201:
             description: Email validated
+            schema:
+                type: json
+                example: {"message": "email validated"}
         401:
             description: Invalid or expired token
+            schema:
+                type: json
+                example: {"error": {"message": "Invalid or expired token"}}
     """
     return controller.confirm_email(token)
 
 
-@bp.route('/signup/renew-validation-token', methods=['PUT'])
+@bp.route('/token-renewal', methods=['PUT'])
 def renew():
     """
     Token renewal
@@ -75,10 +97,20 @@ def renew():
     responses:
         205:
             description: Token renewed
+            schema:
+                type: json
+                example: {'message': 'Token renewed'}
+
         400:
             description: User not found
+            schema:
+                type: json
+                example: {"error": {"message": "Not found"}}
         409:
             description: User email already validated
+            schema:
+                type: json
+                example: {"error": {"message": "Email already validated"}}
     """
     email = request.get_json()['email']
 
@@ -104,7 +136,17 @@ def log_in():
     responses:
         200:
             description: Successful connection
+            schema:
+                type: json
+                example: {
+                    "jwt": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1N[...]VaM4-mIwwlNqI8stxoIxdQLEz_HC7vZkbuOdxfu0"
+                }
         401:
             description: Bad credentials
+            schema:
+                type: json
+                example: {
+                    "error": {"message": "Bad credentials"}
+                }
     """
     return controller.log_in(request.get_json())

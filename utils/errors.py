@@ -13,7 +13,7 @@ class Auth:
 
     @staticmethod
     def throw_error_token_is_denied():
-        return {"error": {"message": "Token expired"}}, 401
+        return {"error": {"message": "Invalid or expired token"}}, 401
 
     @staticmethod
     def throw_error_bad_credentials():

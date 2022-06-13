@@ -1,12 +1,17 @@
 import services.auth as service
 from utils.errors import Auth
 from itsdangerous import BadTimeSignature, SignatureExpired
-from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
-import config
+from werkzeug.security import check_password_hash
 
 
 def sign_up(request):
+    """
+    "If the user is already registered, throw an error, otherwise generate a confirmation token,
+    send the confirmation code, and register the new user."
+
+    :param request: The request object that contains the data sent by the client
+    :return: A tuple of the user object and a 201 status code.
+    """
     firstname = request["firstname"]
     lastname = request["lastname"]
     email = request["email"]
@@ -23,6 +28,12 @@ def sign_up(request):
 
 
 def confirm_email(token):
+    """
+    It takes a token, checks if it's valid, and if it is, it returns a success message
+
+    :param token: The token that was sent to the user's email
+    :return: The email address of the user.
+    """
     try:
         email = service.check_confirmation_token(token)
         return service.validate_account_email(email), 201
@@ -32,6 +43,12 @@ def confirm_email(token):
 
 
 def renew_validation_token(email):
+    """
+    It generates a new token and sends it to the user
+
+    :param email: The email of the user to renew the validation token for
+    :return: A message and a 205 status code.
+    """
     user = service.get_user_by_email(email)
 
     if not user:
@@ -46,10 +63,17 @@ def renew_validation_token(email):
     service.send_confirmation_code(email, new_token)
     service.update_user_on_database(user),
 
-    return {}, 205
+    return {'message': 'Token renewed'}, 205
 
 
 def log_in(request):
+    """
+    It takes an email and password from the request, checks if the user exists and if the password is correct, and if so,
+    returns a token
+
+    :param request: The request object that contains the email and password
+    :return: The user's email and a 200 status code.
+    """
     email = request['email']
     password = request['password']
 
