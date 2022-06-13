@@ -7,7 +7,7 @@ bp = Blueprint('auth', __name__, url_prefix="/auth")
 
 
 @bp.route('/registration', methods=['POST'])
-@expects_json(validation.sign_up)
+@expects_json(validation.registration)
 def sign_up():
     """
     User registration
@@ -51,6 +51,7 @@ def sign_up():
 
 
 @bp.route('/email-confirmation', methods=['PUT'])
+@expects_json(validation.email_confirmation)
 def confirm(token):
     """
     User email confirmation
@@ -81,6 +82,7 @@ def confirm(token):
 
 
 @bp.route('/token-renewal', methods=['PUT'])
+@expects_json(validation.token_renewal)
 def renew():
     """
     Token renewal
@@ -118,6 +120,7 @@ def renew():
 
 
 @bp.route('/login', methods=['POST'])
+@expects_json(validation.login)
 def log_in():
     """
     User login
