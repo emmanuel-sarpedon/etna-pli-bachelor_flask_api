@@ -1,7 +1,7 @@
 from model import User, db
 from werkzeug.security import generate_password_hash
 from itsdangerous import URLSafeTimedSerializer
-from flask import render_template
+from flask import request
 from flask_mail import Message, Mail
 from datetime import date
 import config
@@ -88,7 +88,7 @@ def send_confirmation_code(email, token):
                   sender=config.email_sender,
                   recipients=[email])
 
-    msg.html = render_template("auth_verify_email.html", url='{}/users/confirm-email/{}'.format(config.domain, token))
+    msg.body = 'Pour confirmer votre adresse mail, utilisez ce lien : {}/users/confirm-email/{}'.format(request.host_url, token)
 
     mail.send(msg)
 
