@@ -1,6 +1,9 @@
 import services.auth as service
-from utils.errors import User
+from utils.errors import Auth
 from itsdangerous import BadTimeSignature, SignatureExpired
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+import config
 
 
 def sign_up(request):
@@ -10,7 +13,7 @@ def sign_up(request):
     password = request["password"]
 
     if service.is_user_already_registered(email):
-        return User.throw_error_user_already_exists(), 409
+        return Auth.throw_error_user_already_exists()
 
     confirmation_token = service.generate_confirmation_token(email)
 
@@ -25,17 +28,17 @@ def confirm_email(token):
         return service.validate_account_email(email), 201
 
     except (BadTimeSignature, SignatureExpired):
-        return User.throw_error_token_is_denied(), 401
+        return Auth.throw_error_token_is_denied()
 
 
 def renew_validation_token(email):
     user = service.get_user_by_email(email)
 
     if not user:
-        return User.throw_error_ressource_not_found(), 400
+        return Auth.throw_error_ressource_not_found()
 
     if user.is_email_validated:
-        return User.throw_error_email_already_validated(), 409
+        return Auth.throw_error_email_already_validated()
 
     new_token = service.generate_confirmation_token(user.email)
 
@@ -44,3 +47,15 @@ def renew_validation_token(email):
     service.update_user_on_database(user),
 
     return {}, 205
+
+
+def log_in(request):
+    email = request['email']
+    password = request['password']
+
+    user = service.get_user_by_email(email)
+
+    if not user or not check_password_hash(user.password, password):
+        return Auth.throw_error_bad_credentials()
+
+    return service.log_in(user.email), 200

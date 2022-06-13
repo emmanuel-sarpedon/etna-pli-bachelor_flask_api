@@ -12,3 +12,4 @@ gunicorn
 psycopg2
 flask-swagger
 flask-swagger-ui
+PyJWT~=2.4.0

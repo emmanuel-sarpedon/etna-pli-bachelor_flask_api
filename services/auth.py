@@ -1,10 +1,11 @@
 from model import User, db
 from werkzeug.security import generate_password_hash
 from itsdangerous import URLSafeTimedSerializer
-from flask import render_template, copy_current_request_context
+from flask import render_template
 from flask_mail import Message, Mail
 from datetime import date
 import config
+import jwt
 
 mail = Mail()
 
@@ -76,3 +77,7 @@ def validate_account_email(email):
 def update_user_on_database(user):
     db.session.add(user)
     db.session.commit()
+
+
+def log_in(email):
+    return jwt.encode({"email": email}, config.secret_key, algorithm="HS256")
