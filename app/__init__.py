@@ -24,18 +24,18 @@ def create_app():
     db.init_app(_app)
 
     if config.DB == "cloud":
-        with _app.app_context():  # -----------------------------
-            db.create_all()       # -- For cloud database only --
-            db.session.commit()   # -----------------------------
+        with _app.app_context():  # ------------------------
+            db.create_all()  # -- For cloud database only --
+            db.session.commit()  # -------------------------
 
     else:
         migrate.init_app(_app, db)
 
     # Endpoint registration
     import routes.root as root
-    import routes.users as users
+    import routes.auth as auth
     _app.register_blueprint(root.bp)
-    _app.register_blueprint(users.bp)
+    _app.register_blueprint(auth.bp)
 
     # SMTP Mail
     _app.config.update({
