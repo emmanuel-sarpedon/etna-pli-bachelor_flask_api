@@ -13,7 +13,7 @@ def sign_up():
     User registration
     ---
     tags:
-        - auth
+        - Authentication
     parameters:
       - in: body
         name: body
@@ -31,7 +31,7 @@ def sign_up():
         201:
             description: User created
             schema:
-                type: json
+                type: object
                 example: {
                             'message': 'User created',
                             'user_created': {
@@ -44,7 +44,7 @@ def sign_up():
         409:
             description: Email already used
             schema:
-                type: json
+                type: object
                 example: {"error": {"message": "User already exists"}}
     """
     return controller.sign_up(request.get_json())
@@ -56,7 +56,7 @@ def confirm(token):
     User email confirmation
     ---
     tags:
-        - auth
+        - Authentication
     parameters:
         - in : body
           name: body
@@ -69,12 +69,12 @@ def confirm(token):
         201:
             description: Email validated
             schema:
-                type: json
+                type: object
                 example: {"message": "email validated"}
         401:
             description: Invalid or expired token
             schema:
-                type: json
+                type: object
                 example: {"error": {"message": "Invalid or expired token"}}
     """
     return controller.confirm_email(token)
@@ -86,7 +86,7 @@ def renew():
     Token renewal
     ---
     tags:
-        - auth
+        - Authentication
     parameters:
       - in: body
         name: body
@@ -98,18 +98,18 @@ def renew():
         205:
             description: Token renewed
             schema:
-                type: json
+                type: object
                 example: {'message': 'Token renewed'}
 
         400:
             description: User not found
             schema:
-                type: json
+                type: object
                 example: {"error": {"message": "Not found"}}
         409:
             description: User email already validated
             schema:
-                type: json
+                type: object
                 example: {"error": {"message": "Email already validated"}}
     """
     email = request.get_json()['email']
@@ -123,7 +123,7 @@ def log_in():
     User login
     ---
     tags:
-        - auth
+        - Authentication
     parameters:
       - in: body
         name: body
@@ -137,14 +137,14 @@ def log_in():
         200:
             description: Successful connection
             schema:
-                type: json
+                type: object
                 example: {
                     "jwt": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1N[...]VaM4-mIwwlNqI8stxoIxdQLEz_HC7vZkbuOdxfu0"
                 }
         401:
             description: Bad credentials
             schema:
-                type: json
+                type: object
                 example: {
                     "error": {"message": "Bad credentials"}
                 }
